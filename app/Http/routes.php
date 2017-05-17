@@ -235,6 +235,11 @@ Route::group(["prefix"=>"admindashboard"],function(){
 			Route::any("edit/{id?}","Admin\AchievementController@edit_achievement");
 			Route::get("delete/{id}","Admin\AchievementController@delete_achievement");
 		});
-
+	});
+	Route::group(["prefix"=>"lucky-draw"],function(){
+		Route::get("manage-lucky-draw","Admin\LuckyDrawController@manage_lucky_draw");
+		Route::any("add","Admin\LuckyDrawController@add_lucky_draw");
+		Route::any("edit/{id?}","Admin\AchievementController@edit_achievement");
+		Route::get("delete/{id}","Admin\AchievementController@delete_achievement");
 	});
 });

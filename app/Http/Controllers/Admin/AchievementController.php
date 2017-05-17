@@ -124,6 +124,7 @@ class AchievementController extends Controller
             $this->validate($request,[
                 "achievement_name" => "required",
                 "description" => "required",
+                "amount" => "required|numeric",
                 "bonus_point" => "required|numeric",
                 "achievement_type" => "required",
                 "expiry_date" => "required|date",
@@ -159,6 +160,7 @@ class AchievementController extends Controller
             $this->validate($request,[
                 "achievement_name" => "required",
                 "description" => "required",
+                "amount" => "required|numeric",
                 "bonus_point" => "required|numeric",
                 "achievement_type" => "required",
                 "expiry_date" => "required|date",
