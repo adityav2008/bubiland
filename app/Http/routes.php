@@ -163,6 +163,20 @@ Route::get('/buyerdashboard/delete-rule/{id}', 'DashboardController@delete_rules
 Route::get('/buyerdashboard/update-rule/{id}', 'DashboardController@update_rules');
 Route::post('/buyerdashboard/update-rule/{id}', 'DashboardController@doupdate_rules');
 Route::get('/admindashboard/manage-coupons', 'AdminController@manage_coupons');
+//prashant kumar 17_may
+Route::get('/admindashboard/add-coupons', 'AdminController@addCoupons');
+Route::post('/admindashboard/add-coupons', 'AdminController@addCoupons');
+Route::get('/admindashboard/add-coupons/delete', 'AdminController@deleteCoupons');
+
+Route::get('/admindashboard/add-coupons/manage','AdminController@manageCouponRules');
+Route::post('/admindashboard/add-coupons/manage','AdminController@manageCouponRules');
+
+Route::get('/admindashboard/seller-coupon','AdminController@addSellerCoupons');
+Route::get('/admindashboard/seller-coupons','AdminController@addSellerCoupons');
+Route::post('/admindashboard/seller-coupons','AdminController@addSellerCoupons');
+Route::get('/admindashboard/seller-coupon/delete','AdminController@deleteSellerCoupons');
+
+//prashant kumar 17_may
 Route::get('/search', 'ProductController@search');
 Route::post('/buyerdashboard/hunt-product-detail/{id}', 'ProductController@hunt_product_detail');
 Route::get('/buyerdashboard/view-hunt-request', 'DashboardController@view_hunt_request');
