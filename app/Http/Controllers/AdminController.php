@@ -13,11 +13,13 @@ use Illuminate\Support\Facades\Validator;
 use App\auction_categories;
 use Session;
 use Hash;
+use App\coupon_code_rules;
 use App\create_coupon_code;
 use App\hunt_commission;
 use App\paypal_transactions;
 use App\Products;
 use DB;
+use App\Helper\GetCurrencyHelper;
 class AdminController extends Controller
 {
   public function adminlogin()
@@ -402,8 +404,8 @@ public function manage_coupons(){
   session()->regenerate();
   if(session('usertype') == 'admin'){
     $adminData = admin::where('admin_id',session('admin_id'))->first();
-    $seller_coupons = create_coupon_code::where('role_id', 3)->get();
-    $admin_coupons = create_coupon_code::where('role_id', 1)->get();
+    $seller_coupons = create_coupon_code::where('created_by', 1)->get();
+    $admin_coupons = coupon_code_rules::where('created_by', 1)->get();
     return view('admin.manage-coupons')->with('adminData',$adminData)->with('scoupons', $seller_coupons)->with('acoupons', $admin_coupons);
   }
   else{
@@ -476,107 +478,389 @@ public function manage_products(){
     return redirect('/admin');
   }
 }
-public function update_products($id){
-  $adminData = admin::where('admin_id',session('admin_id'))->first();
-  $product = Products::where('product_id',$id)->first();
-  $category = Categories::where('parent_id','0')->get();
-  $selltype = selltype::get();
-  $subcategory = Categories::where('category_id',$product->product_subcategory)->first(['category_name']);
-  return view('admin.update-product')->with('adminData', $adminData)->with('categories',$category)->with('selltype',$selltype)->with('product',$product)->with('subcategory',$subcategory);
-}
-public function do_update_products(Request $request, $id){
-  $validator = Validator::make($request->all(), [
-    'ptitle'=>'required|max:100',
-    'category'=>'required|max:50|exists:categories,category_id',
-    'scategory'=>'required|max:50|exists:categories,category_id',
-    'description'=>'required',
-    'stype' => 'required|max:50|exists:selltypes,sell_type_id',
-    'keywords' => 'required|max:500',
-    'image' => 'dimensions:min_width=500,min_height=500|mimes:jpeg,bmp,png,jpg',
-    'image1' => 'mimes:jpeg,bmp,png,jpg|dimensions:min_width=500,min_height=500',
-    'image2' => 'mimes:jpeg,bmp,png|dimensions:min_width=500,min_height=500',
-    'image3' => 'mimes:jpeg,bmp,png|dimensions:min_width=500,min_height=500',
-    'actualprice'=>'required|numeric|min:0',
-    'sellprice'=>'required|numeric|min:0',
-    'discount'=>'required|numeric|min:0|max:100',
-    'afterdiscount'=>'required|numeric|min:0',
-    'status'=>'required|numeric|min:0|max:1'
-  ]);
-  if ($validator->fails()) {
-    return redirect('/admindashboard/update-product/'.$id)->withInput()->with('errors',$validator->errors());
+  public function update_products($id){
+    $adminData = admin::where('admin_id',session('admin_id'))->first();
+    $product = Products::where('product_id',$id)->first();
+    $category = Categories::where('parent_id','0')->get();
+    $selltype = selltype::get();
+    $subcategory = Categories::where('category_id',$product->product_subcategory)->first(['category_name']);
+    return view('admin.update-product')->with('adminData', $adminData)->with('categories',$category)->with('selltype',$selltype)->with('product',$product)->with('subcategory',$subcategory);
   }
-  else{
-    if($request->file('image')){
-      $destinationPath = base_path() . '/public/images/product_master/';
-      $current_time = Carbon::now();
-      $extension = $request->file('image')->getClientOriginalExtension();
-      $date = $current_time->year.$current_time->month.$current_time->day.$current_time->hour.$current_time->minute.$current_time->second;
-      $fileName = $date.'.'.$extension;
-      $request->file('image')->move($destinationPath, $fileName);
-      session(['product_images' => $fileName]);
-      Products::where('product_id',$id)->update(['product_images'=>session('product_images')]);
+
+  public function do_update_products(Request $request, $id)
+  {
+      $validator = Validator::make($request->all(), [
+        'ptitle'=>'required|max:100',
+        'category'=>'required|max:50|exists:categories,category_id',
+        'scategory'=>'required|max:50|exists:categories,category_id',
+        'description'=>'required',
+        'stype' => 'required|max:50|exists:selltypes,sell_type_id',
+        'keywords' => 'required|max:500',
+        'image' => 'dimensions:min_width=500,min_height=500|mimes:jpeg,bmp,png,jpg',
+        'image1' => 'mimes:jpeg,bmp,png,jpg|dimensions:min_width=500,min_height=500',
+        'image2' => 'mimes:jpeg,bmp,png|dimensions:min_width=500,min_height=500',
+        'image3' => 'mimes:jpeg,bmp,png|dimensions:min_width=500,min_height=500',
+        'actualprice'=>'required|numeric|min:0',
+        'sellprice'=>'required|numeric|min:0',
+        'discount'=>'required|numeric|min:0|max:100',
+        'afterdiscount'=>'required|numeric|min:0',
+        'status'=>'required|numeric|min:0|max:1'
+      ]);
+    if ($validator->fails()) 
+    {
+      return redirect('/admindashboard/update-product/'.$id)->withInput()->with('errors',$validator->errors());
     }
-    if($request->file('image1')){
-      $current_time = Carbon::now();
-      $extension = $request->file('image1')->getClientOriginalExtension();
-      $date = $current_time->year.$current_time->month.$current_time->day.$current_time->hour.$current_time->minute.$current_time->second.'1';
-      $fileName1 = $date.'.'.$extension;
-      $request->file('image1')->move($destinationPath, $fileName1);
+    else
+    {
+        if($request->file('image'))
+        {
+          $destinationPath = base_path() . '/public/images/product_master/';
+          $current_time = Carbon::now();
+          $extension = $request->file('image')->getClientOriginalExtension();
+          $date = $current_time->year.$current_time->month.$current_time->day.$current_time->hour.$current_time->minute.$current_time->second;
+          $fileName = $date.'.'.$extension;
+          $request->file('image')->move($destinationPath, $fileName);
+          session(['product_images' => $fileName]);
+          Products::where('product_id',$id)->update(['product_images'=>session('product_images')]);
+        }
+        if($request->file('image1')){
+          $current_time = Carbon::now();
+          $extension = $request->file('image1')->getClientOriginalExtension();
+          $date = $current_time->year.$current_time->month.$current_time->day.$current_time->hour.$current_time->minute.$current_time->second.'1';
+          $fileName1 = $date.'.'.$extension;
+          $request->file('image1')->move($destinationPath, $fileName1);
+        }
+        if($request->file('image2')){
+          $current_time = Carbon::now();
+          $extension = $request->file('image2')->getClientOriginalExtension();
+          $date = $current_time->year.$current_time->month.$current_time->day.$current_time->hour.$current_time->minute.$current_time->second.'2';
+          $fileName2 = $date.'.'.$extension;
+          $request->file('image2')->move($destinationPath, $fileName2);
+        }
+        if($request->file('image3')){
+          $current_time = Carbon::now();
+          $extension = $request->file('image3')->getClientOriginalExtension();
+          $date = $current_time->year.$current_time->month.$current_time->day.$current_time->hour.$current_time->minute.$current_time->second.'3';
+          $fileName3 = $date.'.'.$extension;
+          $request->file('image3')->move($destinationPath, $fileName3);
+        }
+        session(['product_name' => $request->input('ptitle'),
+          'product_category' => $request->input('category'),
+          'product_subcategory' => $request->input('scategory'),
+          'product_description' => $request->input('description'),
+          'sell_type_id' => $request->input('stype'),
+          'keywords' => $request->input('keywords'),
+        ]);
+        if($request->file('image1')){
+          session(['image1' => $fileName1]);
+        }
+        if($request->file('image2')){
+          session(['image2' => $fileName2]);
+        }
+        if($request->file('image3')){
+          session(['image3' => $fileName3]);
+        }
+        session(['actual_price' => $request->input('actualprice'), 'selling_price' => $request->input('sellprice'), 'discount' => $request->input('discount'), 'discount_price' => $request->input('afterdiscount')]);
+        Products::where('product_id',$id)->update([
+          'product_name' => session('product_name'),
+          'product_price' => session('actual_price'),
+          'display_price' => session('selling_price'),
+          'product_description' => session('product_description'),
+          'product_category' => session('product_category'),
+          'product_subcategory' => session('product_subcategory'),
+          'keywords' => session('keywords'),
+          'sell_type_id' => session('sell_type_id'),
+          'seller_discount' => session('discount'),
+          'price_after_discount' => session('discount_price'),
+          'status_value' => $request->input('status')
+        ]);
+        if(Session::has('image1')){
+          Products::where('product_id',$id)->update(['product_image_1'=>session('image1')]);
+        }
+        if(Session::has('image2')){
+          Products::where('product_id',$id)->update(['product_image_2'=>session('image2')]);
+        }
+        if(Session::has('image3')){
+          Products::where('product_id',$id)->update(['product_image_3'=>session('image3')]);
+        }
+        return redirect('/admindashboard/update-product/'.$id)->with('success','Product Details Updated');
+      }
     }
-    if($request->file('image2')){
-      $current_time = Carbon::now();
-      $extension = $request->file('image2')->getClientOriginalExtension();
-      $date = $current_time->year.$current_time->month.$current_time->day.$current_time->hour.$current_time->minute.$current_time->second.'2';
-      $fileName2 = $date.'.'.$extension;
-      $request->file('image2')->move($destinationPath, $fileName2);
+
+
+    public function addCoupons(Request $request)
+    {
+      if($request->isMethod('get'))
+      {
+
+         if(isset($_GET['id']))
+         {
+          $adminData = admin::where('admin_id',session('admin_id'))->first();
+          $coupons = DB::table('coupon_code_rules')->where('coupon_rule_id',$request->input('id'))->first();
+          return view('admin.edit-coupons')->with([
+          'coupons'=>$coupons,
+          'adminData'=>$adminData
+          ]);
+
+        }
+        else
+        {
+          $adminData = admin::where('admin_id',session('admin_id'))->first();
+          return view ('admin.edit-coupons')->with('adminData', $adminData);
+        }
+      }
+      if($request->isMethod('post'))
+      {
+         if($request->input('action') == 'add')
+         {   
+             
+              $adminData = admin::where('admin_id',session('admin_id'))->first();
+              $seller_coupons = create_coupon_code::where('role_id', 3)->get();
+              $admin_coupons = coupon_code_rules::where('created_by', 1)->get();
+               $data = $request->all();
+               unset($data['_token']);
+               unset($data['submit']);
+               $flag = new coupon_code_rules;
+               $flag->coupon_rule_id = $request->input('coupon_rule_id');
+               $flag->coupon_id = $request->input('coupon_id');
+               $flag->minimum_amount = $request->input('minimum_amount');
+               $flag->maximum_amount = $request->input('maximum_amount');
+               $flag->created_by = session('admin_id');
+               $flag->updated_by = session('admin_id');
+               $flag->created_at = Carbon::now();
+               $flag->updated_at = Carbon::now();
+               $flag->save();
+              return view ('admin.manage-coupons')->with('adminData', $adminData)->with('scoupons', $seller_coupons)->with('acoupons', $admin_coupons)->with('success','Coupon Successfully added');
+          }
+      
+        if($request->input('action') == 'edit')
+        {
+            $data = $request->all();
+            unset($data['_token']);
+            unset($data['action']);
+            unset($data['submit']);
+            $flag = DB::table('coupon_code_rules')->where('coupon_rule_id',$request->input('coupon_rule_id'))->update($data);
+            if($flag > 0)
+              return redirect('/admindashboard/manage-coupons')->with('success','Coupon successfully updated');
+            else
+              return redirect('/admindashboard/manage-coupons')->with('success','Internal Server Error Occured');
+        }
+        
+
+      }
+    
     }
-    if($request->file('image3')){
-      $current_time = Carbon::now();
-      $extension = $request->file('image3')->getClientOriginalExtension();
-      $date = $current_time->year.$current_time->month.$current_time->day.$current_time->hour.$current_time->minute.$current_time->second.'3';
-      $fileName3 = $date.'.'.$extension;
-      $request->file('image3')->move($destinationPath, $fileName3);
+
+  public function deleteCoupons(Request $request)
+  {
+    if($request->isMethod('get'))
+    {
+
+       $flag = DB::table('coupon_code_rules')->where('coupon_rule_id',$request->input('id'))->delete();
+        if($flag > 0)
+        return redirect('/admindashboard/manage-coupons')->with('success','Coupon successfully Deleted');
+        else
+        return redirect('/admindashboard/manage-coupons')->with('success','Internal Server Error Occured');
+
     }
-    session(['product_name' => $request->input('ptitle'),
-    'product_category' => $request->input('category'),
-    'product_subcategory' => $request->input('scategory'),
-    'product_description' => $request->input('description'),
-    'sell_type_id' => $request->input('stype'),
-    'keywords' => $request->input('keywords'),
-  ]);
-  if($request->file('image1')){
-    session(['image1' => $fileName1]);
   }
-  if($request->file('image2')){
-    session(['image2' => $fileName2]);
-  }
-  if($request->file('image3')){
-    session(['image3' => $fileName3]);
-  }
-  session(['actual_price' => $request->input('actualprice'), 'selling_price' => $request->input('sellprice'), 'discount' => $request->input('discount'), 'discount_price' => $request->input('afterdiscount')]);
-  Products::where('product_id',$id)->update([
-    'product_name' => session('product_name'),
-    'product_price' => session('actual_price'),
-    'display_price' => session('selling_price'),
-    'product_description' => session('product_description'),
-    'product_category' => session('product_category'),
-    'product_subcategory' => session('product_subcategory'),
-    'keywords' => session('keywords'),
-    'sell_type_id' => session('sell_type_id'),
-    'seller_discount' => session('discount'),
-    'price_after_discount' => session('discount_price'),
-    'status_value' => $request->input('status')
-  ]);
-  if(Session::has('image1')){
-    Products::where('product_id',$id)->update(['product_image_1'=>session('image1')]);
-  }
-  if(Session::has('image2')){
-    Products::where('product_id',$id)->update(['product_image_2'=>session('image2')]);
-  }
-  if(Session::has('image3')){
-    Products::where('product_id',$id)->update(['product_image_3'=>session('image3')]);
-  }
-  return redirect('/admindashboard/update-product/'.$id)->with('success','Product Details Updated');
+
+  public function addSellerCoupons(Request $request)
+  {
+      if($request->isMethod('get'))
+      {
+
+         if(isset($_GET['id']))
+         {
+          $adminData = admin::where('admin_id',session('admin_id'))->first();
+           $scoupon = DB::table('create_coupon_codes')->where('coupon_id',$request->input('id'))->first();
+          return view('admin.edit-seller-coupons')->with([
+          'scoupons'=>$scoupon,
+          'adminData'=>$adminData
+          ]);
+
+        }
+        else
+        {
+          $adminData = admin::where('admin_id',session('admin_id'))->first();
+          return view ('admin.edit-seller-coupons')->with('adminData', $adminData);
+        }
+      }
+      if($request->isMethod('post'))
+      {
+         if($request->input('action') == 'add')
+         {   
+             
+              $adminData = admin::where('admin_id',session('admin_id'))->first();
+              // $seller_coupons = create_coupon_code::where('role_id', 3)->get();
+              $seller_coupons = create_coupon_code::where('created_by', 1)->get();
+              $admin_coupons = coupon_code_rules::where('created_by', 1)->get();
+               $data = $request->all();
+               unset($data['_token']);
+               unset($data['submit']);
+               $flag = new create_coupon_code;
+               $flag->coupon_id = $request->input('coupon_id');
+               $flag->title = $request->input('title');
+               $flag->coupon_code = $request->input('coupon_code');
+               $flag->start_date = $request->input('start_date');
+               $flag->end_date = $request->input('end_date');
+               $flag->is_visible_to_seller = $request->input('is_visible_to_seller');
+               $flag->is_visible_to_buyer = $request->input('is_visible_to_buyer');
+               $flag->is_visible_to_public = $request->input('is_visible_to_public');
+               $flag->is_visible_to_seller = $request->input('is_visible_to_seller');
+               $flag->discount = $request->input('discount');
+               $flag->is_fixed = $request->input('is_fixed');
+               $flag->is_percentage = $request->input('is_percentage');
+               $flag->role_id = $request->input('role_id');
+               $flag->created_by = session('admin_id');
+               $flag->updated_by = session('admin_id');
+               $flag->created_at = Carbon::now();
+               $flag->updated_at = Carbon::now();
+               $flag->save();
+              return view ('admin.manage-coupons')->with('adminData', $adminData)->with('scoupons', $seller_coupons)->with('acoupons', $admin_coupons)->with('success','Coupon Successfully added');
+          }
+      
+        if($request->input('action') == 'edit')
+        {
+            $data = $request->all();
+            unset($data['_token']);
+            unset($data['action']);
+            unset($data['submit']);
+            $flag = DB::table('create_coupon_codes')->where('coupon_id',$request->input('coupon_id'))->update($data);
+            if($flag > 0)
+              return redirect('/admindashboard/manage-coupons')->with('success','Coupon successfully updated');
+            else
+              return redirect('/admindashboard/manage-coupons')->with('success','Internal Server Error Occured');
+        }
+        
+
+      }
+    
+    }
+
+    public function deleteSellerCoupons(Request $request)
+    {
+      if($request->isMethod('get'))
+      {
+     
+          $flag = DB::table('create_coupon_codes')->where('coupon_id',$request->input('id'))->delete();
+          if($flag > 0)
+          return redirect('/admindashboard/manage-coupons')->with('success','Coupon successfully Deleted');
+          else
+          return redirect('/admindashboard/manage-coupons')->with('success','Internal Server Error Occured');
+
+      }
+    }
+
+    // public function manageCouponRules(Request $request)
+    // {
+    //   session()->regenerate();
+    //   if($request->isMethod('get'))
+    //   {
+    //     if($request->input('id') != "")
+    //     {
+    //       $currency = GetCurrencyHelper::getCurrencyList();
+    //       $adminData = admin::where('admin_id',session('admin_id'))->first();
+    //       $couponRule = DB::table('coupon_rules')->where('rule_id',$request->input('id'))->first();
+    //       return view('admin.edit-coupon-rules')->with([
+    //       'couponRule'=>$couponRule,
+    //       'adminData'=>$adminData,
+    //       'currency' =>$currency
+    //       ]);
+
+    //     }
+    //     else
+    //     {
+          
+    //       $currency = GetCurrencyHelper::getCurrencyList();
+    //       $adminData = admin::where('admin_id',session('admin_id'))->first();
+    //       return view ('admin.edit-coupon-rules')->with(['adminData'=> $adminData,'currency'=>$currency]);
+    //     }
+    //   }
+    // }
+
+    // public function manageCouponRules(Request $request){
+    //   session()->regenerate();
+    //   if(session('usertype') == 'admin'){
+    //     $adminData = admin::where('admin_id',session('admin_id'))->first();
+    //     $seller_coupons = create_coupon_code::where('created_by', 1)->get();
+    //     $admin_coupons = coupon_code_rules::where('created_by', 1)->get();
+    //     return view('admin.manage-coupons')->with('adminData',$adminData)->with('scoupons', $seller_coupons)->with('acoupons', $admin_coupons);
+    //   }
+    //   else{
+    //     return redirect('/admin');
+    //   }
+    // }
+    public function manageCouponRules(Request $request)
+    {
+
+      if($request->isMethod('get'))
+      {
+
+         if(isset($_GET['id']))
+         {
+          $currency = GetCurrencyHelper::getCurrencyList();
+          $adminData = admin::where('admin_id',session('admin_id'))->first();
+          $coupons = DB::table('coupon_rules')->where('rule_id',$request->input('id'))->first();
+          return view('admin.edit-coupon-rules')->with([
+          'coupons'=>$coupons,
+          'adminData'=>$adminData,
+          'currency' =>$currency
+          ]);
+
+        }
+        else
+        {
+          $currency = GetCurrencyHelper::getCurrencyList();
+          $adminData = admin::where('admin_id',session('admin_id'))->first();
+          return view ('admin.edit-coupon-rules')->with(['adminData'=> $adminData,'currency' =>$currency]);
+        }
+      }
+      if($request->isMethod('post'))
+      {
+         if($request->input('action') == 'add')
+         {   
+             
+              $adminData = admin::where('admin_id',session('admin_id'))->first();
+              $seller_coupons = create_coupon_code::where('created_by', 1)->get();
+              $admin_coupons = coupon_code_rules::where('created_by', 1)->get();
+
+               $data = $request->all();
+               exit;
+
+               unset($data['_token']);
+               unset($data['submit']);
+               $flag = new coupon_code_rules;
+               $flag->coupon_rule_id = $request->input('coupon_rule_id');
+               $flag->coupon_id = $request->input('coupon_id');
+               $flag->minimum_amount = $request->input('minimum_amount');
+               $flag->maximum_amount = $request->input('maximum_amount');
+               $flag->created_by = session('admin_id');
+               $flag->updated_by = session('admin_id');
+               $flag->created_at = Carbon::now();
+               $flag->updated_at = Carbon::now();
+               $flag->save();
+
+              return view ('admin.manage-coupons')->with('adminData', $adminData)->with('scoupons', $seller_coupons)->with('acoupons', $admin_coupons)->with('success','Coupon Successfully added');
+          }
+      
+        if($request->input('action') == 'edit')
+        {
+            $data = $request->all();
+            unset($data['_token']);
+            unset($data['action']);
+            unset($data['submit']);
+            $flag = DB::table('coupon_code_rules')->where('coupon_rule_id',$request->input('coupon_rule_id'))->update($data);
+            if($flag > 0)
+              return redirect('/admindashboard/manage-coupons')->with('success','Coupon successfully updated');
+            else
+              return redirect('/admindashboard/manage-coupons')->with('success','Internal Server Error Occured');
+        }
+        
+
+      }
+    
+    }   
+
 }
-}
-}
+
