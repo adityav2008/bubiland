@@ -63,6 +63,10 @@ Route::get('/admindashboard/managecategories','AdminController@managecategories'
 Route::get('/admindashboard/viewsubcategories','AdminController@viewsubcategories');
 Route::get('/admindashboard/managebrands','AdminController@managebrands');
 Route::get('/admindashboard/auctioncategories','AdminController@auctioncategories');
+
+Route::get('/admindashboard/add-auction-category','AdminController@addAuctionCategories');
+Route::post('/admindashboard/add-auction-category','AdminController@addAuctionCategories');
+
 Route::get('/admindashboard/addproductcategory','AdminController@addproductcategory');
 Route::post('/admindashboard/addproductcategory','AdminController@doaddproductcategory');
 Route::get('/admindashboard/editproductcategory','AdminController@editproductcategory');
@@ -162,6 +166,7 @@ Route::post('/buyerdashboard/add-rule/{id}', 'DashboardController@doadd_rules');
 Route::get('/buyerdashboard/delete-rule/{id}', 'DashboardController@delete_rules');
 Route::get('/buyerdashboard/update-rule/{id}', 'DashboardController@update_rules');
 Route::post('/buyerdashboard/update-rule/{id}', 'DashboardController@doupdate_rules');
+
 Route::get('/admindashboard/manage-coupons', 'AdminController@manage_coupons');
 //prashant kumar 17_may
 Route::get('/admindashboard/add-coupons', 'AdminController@addCoupons');
@@ -169,6 +174,7 @@ Route::post('/admindashboard/add-coupons', 'AdminController@addCoupons');
 Route::get('/admindashboard/add-coupons/delete', 'AdminController@deleteCoupons');
 
 Route::get('/admindashboard/add-coupons/manage','AdminController@manageCouponRules');
+Route::get('/admindashboard/add-coupons/manage/delete','AdminController@deleteCouponRules');
 Route::post('/admindashboard/add-coupons/manage','AdminController@manageCouponRules');
 
 Route::get('/admindashboard/seller-coupon','AdminController@addSellerCoupons');

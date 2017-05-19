@@ -97,17 +97,86 @@ public function managebrands(){
     return redirect('/admin');
   }
 }
+//prashant kumar 19_may_2017 Auction
 public function auctioncategories(){
   session()->regenerate();
   if(session('usertype') == 'admin'){
     $adminData = admin::where('admin_id',session('admin_id'))->first();
     $auctioncategories = auction_categories::get();
-    return view('admin.auctioncategories')->with('adminData',$adminData)->with('auctioncategories',$auctioncategories);
+    return view('admin.auctioncategories')->with([
+      'adminData'=>$adminData,
+      'auctioncategories'=>$auctioncategories
+      ]);
   }
   else{
     return redirect('/admin');
   }
 }
+
+  public function addAuctionCategories(Request $request)
+  {
+    if($request->isMethod('get'))
+    {
+
+      if($request->input('id'))
+      {
+        $auctioncategories = auction_categories::where('auction_category_id',$request->input('id'))->first();
+        $adminData = admin::where('admin_id',session('admin_id'))->first();
+        return view('admin.edit-auction')->with([
+        'adminData'=>$adminData,
+        'auctioncategories'=>$auctioncategories
+        ]);
+      }
+      else
+      {
+        $adminData = admin::where('admin_id',session('admin_id'))->first();
+        return view ('admin.edit-auction')->with([
+          'adminData'=> $adminData
+          ]);
+      }
+    }
+    if($request->isMethod('post'))
+    {
+      
+     if($request->input('action') == 'add')
+     {   
+        $data = $request->all();
+        unset($data['_token']);
+        unset($data['action']);
+        unset($data['submit']);
+        Validator::make($request->all(), [
+        'auction_category_name' => 'required|max:100|string',
+        'status_value'=> 'required|numeric|max:1|min:0',
+        'index_value'=> 'required|numeric|max:1|min:0'
+        ]);
+
+        $flag = DB::table('auction_categories')->insertGetId($data);
+        if($flag > 0)
+        return redirect('/admindashboard/auctioncategories')->with('success','New Category successfully added');
+        else
+        return redirect('/admindashboard/add-auction-category')->with('success','Internal Server Error Occured');
+      }
+      if($request->input('action') == 'edit')
+      { 
+        $data = $request->all();
+        unset($data['_token']);
+        unset($data['action']);
+        unset($data['submit']);
+        unset($data['id']);
+        Validator::make($request->all(), [
+        'auction_category_name' => 'required|max:100|string',
+        'status_value'=> 'required|numeric|max:1|min:0',
+        'index_value'=> 'required|numeric|max:1|min:0'
+        ]);
+        $flag = DB::table('auction_categories')->where('auction_category_id',$_GET['id'])->update($data);
+        if($flag > 0)
+          return redirect('/admindashboard/auctioncategories')->with('success','Coupon successfully updated');
+        else
+          return redirect('/admindashboard/add-auction-category')->with('success','Internal Server Error Occured');
+      }
+    }
+  }
+  //prashant kumar 19th_may_2017
 public function addproductcategory(){
   session()->regenerate();
   if(session('usertype') == 'admin'){
@@ -400,18 +469,7 @@ public function doeditsubcategory(Request $request){
     return redirect('/admin');
   }
 }
-public function manage_coupons(){
-  session()->regenerate();
-  if(session('usertype') == 'admin'){
-    $adminData = admin::where('admin_id',session('admin_id'))->first();
-    $seller_coupons = create_coupon_code::where('created_by', 1)->get();
-    $admin_coupons = coupon_code_rules::where('created_by', 1)->get();
-    return view('admin.manage-coupons')->with('adminData',$adminData)->with('scoupons', $seller_coupons)->with('acoupons', $admin_coupons);
-  }
-  else{
-    return redirect('/admin');
-  }
-}
+
 public function hunting_commission(){
   session()->regenerate();
   if(session('usertype') == 'admin'){
@@ -588,6 +646,27 @@ public function manage_products(){
     }
 
 
+    public function manage_coupons()
+    {
+      session()->regenerate();
+      if(session('usertype') == 'admin')
+      {
+        $adminData = admin::where('admin_id',session('admin_id'))->first();
+        $seller_coupons = create_coupon_code::where('role', 'seller')->get();
+        $admin_coupons = create_coupon_code::where('role', 'admin')->get();
+        $rule = CouponRules::where('created_by',1)->get();
+        return view('admin.manage-coupons')->with([
+          'adminData'=>$adminData,
+          'scoupons'=>$seller_coupons,
+          'acoupons'=> $admin_coupons,
+          'rules'=>$rule
+          ]);
+      }
+      else{
+        return redirect('/admin');
+      }
+    }
+
     public function addCoupons(Request $request)
     {
       if($request->isMethod('get'))
@@ -596,41 +675,74 @@ public function manage_products(){
          if(isset($_GET['id']))
          {
           $adminData = admin::where('admin_id',session('admin_id'))->first();
-          $coupons = DB::table('coupon_code_rules')->where('coupon_rule_id',$request->input('id'))->first();
+          $coupons = create_coupon_code::where('coupon_id',$request->input('id'))->first();
+          $coupon_rule_id = CouponRules::where('created_by',1)->get();
+          //dd($coupons);
           return view('admin.edit-coupons')->with([
           'coupons'=>$coupons,
-          'adminData'=>$adminData
+          'adminData'=>$adminData,
+          'rule_id'=>$coupon_rule_id,
           ]);
 
         }
         else
         {
+          $coupon_rule_id = CouponRules::where('created_by',1)->get();
+          $adminCoupon = create_coupon_code::where('role','admin')->get();
           $adminData = admin::where('admin_id',session('admin_id'))->first();
-          return view ('admin.edit-coupons')->with('adminData', $adminData);
+          return view ('admin.edit-coupons')->with([
+            'adminData'=> $adminData,
+            'rule_id'=>$coupon_rule_id,
+            'adminCoupon' =>$adminCoupon
+            ]);
         }
       }
       if($request->isMethod('post'))
       {
+        // dd($request->all());
          if($request->input('action') == 'add')
          {   
-             
+              $rule = CouponRules::where('created_by',1)->get();
               $adminData = admin::where('admin_id',session('admin_id'))->first();
-              $seller_coupons = create_coupon_code::where('role_id', 3)->get();
-              $admin_coupons = coupon_code_rules::where('created_by', 1)->get();
+              $seller_coupons = create_coupon_code::where('role', 'seller')->get();
+              $admin_coupons = create_coupon_code::where('role', 'admin')->get();
+
+              $this->validate($request,[
+              "coupon_id" => "required|numeric",
+              "start_date" => "required|date",
+              "end_date" => "required|date|after:start_date'",
+              "discount" => "required",
+              "is_fixed" => "required|numeric",
+              "is_percentage" => "required|numeric",
+              ]);
                $data = $request->all();
                unset($data['_token']);
                unset($data['submit']);
-               $flag = new coupon_code_rules;
-               $flag->coupon_rule_id = $request->input('coupon_rule_id');
+               $flag = new create_coupon_code;
                $flag->coupon_id = $request->input('coupon_id');
-               $flag->minimum_amount = $request->input('minimum_amount');
-               $flag->maximum_amount = $request->input('maximum_amount');
+               $flag->title = $request->input('title');
+               $flag->coupon_code = $request->input('coupon_code');
+               $flag->start_date = $request->input('start_date');
+               $flag->end_date = $request->input('end_date');
+               $flag->is_visible_to_seller = $request->input('is_visible_to_seller');
+               $flag->is_visible_to_buyer = $request->input('is_visible_to_buyer');
+               $flag->is_visible_to_public = $request->input('is_visible_to_public');
+               $flag->is_visible_to_seller = $request->input('is_visible_to_seller');
+               $flag->discount = $request->input('discount');
+               $flag->is_fixed = $request->input('is_fixed');
+               $flag->is_percentage = $request->input('is_percentage');
+               $flag->role = "admin";
                $flag->created_by = session('admin_id');
                $flag->updated_by = session('admin_id');
                $flag->created_at = Carbon::now();
                $flag->updated_at = Carbon::now();
                $flag->save();
-              return view ('admin.manage-coupons')->with('adminData', $adminData)->with('scoupons', $seller_coupons)->with('acoupons', $admin_coupons)->with('success','Coupon Successfully added');
+              return view ('admin.manage-coupons')->with([
+                'adminData'=> $adminData,
+                'scoupons'=>$seller_coupons,
+                'acoupons'=> $admin_coupons,
+                'rules'=>$rule
+                ])->with('success','Coupon Successfully added');
           }
       
         if($request->input('action') == 'edit')
@@ -639,7 +751,7 @@ public function manage_products(){
             unset($data['_token']);
             unset($data['action']);
             unset($data['submit']);
-            $flag = DB::table('coupon_code_rules')->where('coupon_rule_id',$request->input('coupon_rule_id'))->update($data);
+            $flag = DB::table('create_coupon_codes')->where('coupon_id',$request->input('coupon_id'))->update($data);
             if($flag > 0)
               return redirect('/admindashboard/manage-coupons')->with('success','Coupon successfully updated');
             else
@@ -656,7 +768,7 @@ public function manage_products(){
     if($request->isMethod('get'))
     {
 
-       $flag = DB::table('coupon_code_rules')->where('coupon_rule_id',$request->input('id'))->delete();
+       $flag = DB::table('create_coupon_codes')->where('coupon_id',$request->input('id'))->delete();
         if($flag > 0)
         return redirect('/admindashboard/manage-coupons')->with('success','Coupon successfully Deleted');
         else
@@ -674,6 +786,7 @@ public function manage_products(){
          {
           $adminData = admin::where('admin_id',session('admin_id'))->first();
            $scoupon = DB::table('create_coupon_codes')->where('coupon_id',$request->input('id'))->first();
+           //dd($scoupon);
           return view('admin.edit-seller-coupons')->with([
           'scoupons'=>$scoupon,
           'adminData'=>$adminData
@@ -682,8 +795,12 @@ public function manage_products(){
         }
         else
         {
+          $coupon_rule_id = CouponRules::where('created_by',1)->get();
           $adminData = admin::where('admin_id',session('admin_id'))->first();
-          return view ('admin.edit-seller-coupons')->with('adminData', $adminData);
+          return view ('admin.edit-seller-coupons')->with([
+            'adminData'=>$adminData,
+            'rule_id'=>$coupon_rule_id
+            ]);
         }
       }
       if($request->isMethod('post'))
@@ -711,7 +828,7 @@ public function manage_products(){
                $flag->discount = $request->input('discount');
                $flag->is_fixed = $request->input('is_fixed');
                $flag->is_percentage = $request->input('is_percentage');
-               $flag->role_id = $request->input('role_id');
+               $flag->role = "seller";
                $flag->created_by = session('admin_id');
                $flag->updated_by = session('admin_id');
                $flag->created_at = Carbon::now();
@@ -722,10 +839,12 @@ public function manage_products(){
       
         if($request->input('action') == 'edit')
         {
+            // dd($request->all());
             $data = $request->all();
             unset($data['_token']);
             unset($data['action']);
             unset($data['submit']);
+            $data['role']= "seller";
             $flag = DB::table('create_coupon_codes')->where('coupon_id',$request->input('coupon_id'))->update($data);
             if($flag > 0)
               return redirect('/admindashboard/manage-coupons')->with('success','Coupon successfully updated');
@@ -752,115 +871,97 @@ public function manage_products(){
       }
     }
 
-    // public function manageCouponRules(Request $request)
-    // {
-    //   session()->regenerate();
-    //   if($request->isMethod('get'))
-    //   {
-    //     if($request->input('id') != "")
-    //     {
-    //       $currency = GetCurrencyHelper::getCurrencyList();
-    //       $adminData = admin::where('admin_id',session('admin_id'))->first();
-    //       $couponRule = DB::table('coupon_rules')->where('rule_id',$request->input('id'))->first();
-    //       return view('admin.edit-coupon-rules')->with([
-    //       'couponRule'=>$couponRule,
-    //       'adminData'=>$adminData,
-    //       'currency' =>$currency
-    //       ]);
 
-    //     }
-    //     else
-    //     {
-          
-    //       $currency = GetCurrencyHelper::getCurrencyList();
-    //       $adminData = admin::where('admin_id',session('admin_id'))->first();
-    //       return view ('admin.edit-coupon-rules')->with(['adminData'=> $adminData,'currency'=>$currency]);
-    //     }
-    //   }
-    // }
-
-    // public function manageCouponRules(Request $request){
-    //   session()->regenerate();
-    //   if(session('usertype') == 'admin'){
-    //     $adminData = admin::where('admin_id',session('admin_id'))->first();
-    //     $seller_coupons = create_coupon_code::where('created_by', 1)->get();
-    //     $admin_coupons = coupon_code_rules::where('created_by', 1)->get();
-    //     return view('admin.manage-coupons')->with('adminData',$adminData)->with('scoupons', $seller_coupons)->with('acoupons', $admin_coupons);
-    //   }
-    //   else{
-    //     return redirect('/admin');
-    //   }
-    // }
     public function manageCouponRules(Request $request)
     {
 
       if($request->isMethod('get'))
       {
 
-         if(isset($_GET['id']))
+         if($request->input('id'))
          {
           $currency = GetCurrencyHelper::getCurrencyList();
+          $country = GetCountryHelper::getCountryList();
           $adminData = admin::where('admin_id',session('admin_id'))->first();
           $coupons = DB::table('coupon_rules')->where('rule_id',$request->input('id'))->first();
           return view('admin.edit-coupon-rules')->with([
-          'coupons'=>$coupons,
+          'couponRule'=>$coupons,
           'adminData'=>$adminData,
-          'currency' =>$currency
+          'currency' =>$currency,
+          'country' => $country
           ]);
 
         }
         else
         {
+          $country = GetCountryHelper::getCountryList();
           $currency = GetCurrencyHelper::getCurrencyList();
           $adminData = admin::where('admin_id',session('admin_id'))->first();
-          return view ('admin.edit-coupon-rules')->with(['adminData'=> $adminData,'currency' =>$currency]);
+          return view ('admin.edit-coupon-rules')->with(['adminData'=> $adminData,'currency' =>$currency,'country' => $country]);
         }
       }
       if($request->isMethod('post'))
       {
-         if($request->input('action') == 'add')
-         {   
-             
-              $adminData = admin::where('admin_id',session('admin_id'))->first();
-              $seller_coupons = create_coupon_code::where('created_by', 1)->get();
-              $admin_coupons = coupon_code_rules::where('created_by', 1)->get();
-
-               $data = $request->all();
-               exit;
-
-               unset($data['_token']);
-               unset($data['submit']);
-               $flag = new coupon_code_rules;
-               $flag->coupon_rule_id = $request->input('coupon_rule_id');
-               $flag->coupon_id = $request->input('coupon_id');
-               $flag->minimum_amount = $request->input('minimum_amount');
-               $flag->maximum_amount = $request->input('maximum_amount');
-               $flag->created_by = session('admin_id');
-               $flag->updated_by = session('admin_id');
-               $flag->created_at = Carbon::now();
-               $flag->updated_at = Carbon::now();
-               $flag->save();
-
-              return view ('admin.manage-coupons')->with('adminData', $adminData)->with('scoupons', $seller_coupons)->with('acoupons', $admin_coupons)->with('success','Coupon Successfully added');
-          }
-      
+        if($request->input('action') == 'add')
+        {      
+          $adminData = admin::where('admin_id',session('admin_id'))->first();
+          $seller_coupons = create_coupon_code::where('created_by', 1)->get();
+          $admin_coupons = coupon_code_rules::where('created_by', 1)->get();
+          $data = $request->all();
+          unset($data['_token']);
+          unset($data['submit']);
+          $flag = new CouponRules;
+          $flag->rule_id = $request->input('rule_id');
+          $flag->title = $request->input('title');
+          $flag->coupon_code = $request->input('coupon_code');
+          $flag->valid_country = $request->input('valid_country');
+          $flag->valid_currency = $request->input('valid_currency');
+          $flag->valid_upto_transactions = $request->input('valid_upto_transactions');
+          $flag->valid_upto_quantity = $request->input('valid_upto_quantity');
+          $flag->valid_value = $request->input('valid_value');
+          $flag->start_date = $request->input('start_date');
+          $flag->end_date = $request->input('end_date');
+          $flag->is_visible_to_seller = $request->input('is_visible_to_seller');
+          $flag->is_visible_to_buyer = $request->input('is_visible_to_buyer');
+          $flag->is_visible_to_public = $request->input('is_visible_to_public');
+          $flag->discount = $request->input('discount');
+          $flag->is_fixed = $request->input('is_fixed');
+          $flag->is_percentage = $request->input('is_percentage');
+          $flag->role_id = $request->input('role_id');
+          $flag->created_by = session('admin_id');
+          $flag->updated_by = session('admin_id');
+          $flag->created_at = Carbon::now();
+          $flag->updated_at = Carbon::now();
+          $flag->save();
+          return view ('admin.manage-coupons')->with('adminData', $adminData)->with('scoupons', $seller_coupons)->with('acoupons', $admin_coupons)->with('success','Coupon Successfully added');
+        }
         if($request->input('action') == 'edit')
         {
-            $data = $request->all();
-            unset($data['_token']);
-            unset($data['action']);
-            unset($data['submit']);
-            $flag = DB::table('coupon_code_rules')->where('coupon_rule_id',$request->input('coupon_rule_id'))->update($data);
-            if($flag > 0)
-              return redirect('/admindashboard/manage-coupons')->with('success','Coupon successfully updated');
-            else
-              return redirect('/admindashboard/manage-coupons')->with('success','Internal Server Error Occured');
+          $data = $request->all();
+          unset($data['_token']);
+          unset($data['action']);
+          unset($data['submit']);
+          $flag = DB::table('coupon_rules')->where('rule_id',$request->input('rule_id'))->update($data);
+          if($flag > 0)
+            return redirect('/admindashboard/manage-coupons')->with('success','Coupon successfully updated');
+          else
+            return redirect('/admindashboard/manage-coupons')->with('success','Internal Server Error Occured');
         }
-        
-
       }
-    
     }   
 
-}
+    public function deleteCouponRules(Request $request)
+    {
+      if($request->isMethod('get'))
+      {
+     
+          $flag = DB::table('coupon_rules')->where('rule_id',$request->input('id'))->delete();
+          if($flag > 0)
+          return redirect('/admindashboard/manage-coupons')->with('success','Coupon successfully Deleted');
+          else
+          return redirect('/admindashboard/manage-coupons')->with('success','Internal Server Error Occured');
 
+      }
+    }
+
+}

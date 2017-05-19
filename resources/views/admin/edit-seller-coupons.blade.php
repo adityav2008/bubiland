@@ -21,24 +21,24 @@
                 <input type="hidden" name="action" value="add" />
             @endif
                <div class="form-group">
-                  <label class="control-label col-md-3 col-sm-3 col-xs-12" for="password">Coupon ID
+                  <label class="control-label col-md-3 col-sm-3 col-xs-12">Coupon ID
                   </label>
                   <div class="col-md-6 col-sm-6 col-xs-12 @if ($errors->has('coupon_id')) error @endif">
                      @if(isset($scoupons))
                     
-                     <input type="text" id="name"  name="coupon_id" value ="@if($errors->has('coupon_id')){{old('coupon_id')}}@else{{$scoupons->coupon_id}}@endif "  required />
+                     <input type="text" id="name" class="form-control m-bot15"  name="coupon_id" value ="@if($errors->has('coupon_id')){{old('coupon_id')}}@else{{$scoupons->coupon_id}}@endif "  required />
 	                     @if($errors->has('coupon_id'))
 	                     <div class="alert alert-danger">
 	                        {{$errors->first('coupon_id')}}
 	                     </div>
 	                     @endif
                      @else
-                    <input type="text" name="coupon_id" id="name" value="{{old('coupon_id')}}">
+                    <input type="text" name="coupon_id" class="form-control m-bot15" id="name" value="{{old('coupon_id')}}">
                     @endif
                   </div>
                </div>
                <div class="form-group">
-                  <label for="confirmpassword" class="control-label col-md-3 col-sm-3 col-xs-12">Title</label>
+                  <label class="control-label col-md-3 col-sm-3 col-xs-12">Title</label>
                   <div class="col-md-6 col-sm-6 col-xs-12 @if ($errors->has('title')) error @endif">
                      @if(isset($scoupons))
                      <input type="text" id="name" class="form-control col-md-7 col-xs-12" name="title" value ="@if($errors->has('title')){{old('title')}}@else{{$scoupons->title}}@endif "  required />
@@ -48,12 +48,12 @@
 	                     </div>
 	                     @endif
                      @else
-                    <input type="text" name="title" id="name" value="{{old('title')}}">
+                    <input type="text" name="title" class="form-control m-bot15" id="name" value="{{old('title')}}">
                     @endif
                   </div>
                </div>
                <div class="form-group">
-                  <label for="confirmpassword" class="control-label col-md-3 col-sm-3 col-xs-12">Coupon Code</label>
+                  <label class="control-label col-md-3 col-sm-3 col-xs-12">Coupon Code</label>
                   <div class="col-md-6 col-sm-6 col-xs-12 @if ($errors->has('coupon_code')) error @endif">
                      @if(isset($scoupons))
                      <input type="text" id="name" class="form-control col-md-7 col-xs-12" name="coupon_code" value ="@if($errors->has('coupon_code')){{old('coupon_code')}}@else{{$scoupons->coupon_code}}@endif "  required />
@@ -63,13 +63,13 @@
 	                     </div>
 	                     @endif
                      @else
-                    <input type="text" name="coupon_code" id="name" value="{{old('coupon_code')}}">
+                    <input type="text" name="coupon_code" class="form-control m-bot15" id="name" value="{{old('coupon_code')}}">
                     @endif
                   </div>
                   
                </div>
                <div class="form-group">
-                  <label for="confirmpassword" class="control-label col-md-3 col-sm-3 col-xs-12">Start Date</label>
+                  <label class="control-label col-md-3 col-sm-3 col-xs-12">Start Date</label>
                   <div class="col-md-6 col-sm-6 col-xs-12 @if ($errors->has('start_date')) error @endif">
                      @if(isset($scoupons))
                      <input type="date" id="datepicker1" class="form-control col-md-7 col-xs-12" name="start_date" value ="@if($errors->has('start_date')){{old('start_date')}}@else{{$scoupons->start_date}}@endif "  required />
@@ -79,13 +79,13 @@
 	                     </div>
 	                     @endif
                      @else
-                    <input type="date" name="start_date" id="datepicker1" value="{{old('start_date')}}">
+                    <input type="date" name="start_date" class="form-control m-bot15" id="datepicker1" value="{{old('start_date')}}">
                     @endif
                   </div>
                </div>
 
                <div class="form-group">
-                  <label for="confirmpassword" class="control-label col-md-3 col-sm-3 col-xs-12">End Date</label>
+                  <label class="control-label col-md-3 col-sm-3 col-xs-12">End Date</label>
                   <div class="col-md-6 col-sm-6 col-xs-12 @if ($errors->has('end_date')) error @endif">
                      @if(isset($scoupons))
                      <input type="date" id="datepicker2" class="form-control col-md-7 col-xs-12" name="end_date" value ="@if($errors->has('end_date')){{old('end_date')}}@else{{$scoupons->end_date}}@endif "  required />
@@ -95,58 +95,98 @@
 	                     </div>
 	                     @endif
                      @else
-                    <input type="date" name="end_date" id="datepicker2" value="{{old('end_date')}}">
+                    <input type="date" name="end_date" class="form-control m-bot15" id="datepicker2" value="{{old('end_date')}}">
                     @endif
                   </div>
                </div>
 
-               <div class="form-group">
-                  <label for="confirmpassword" class="control-label col-md-3 col-sm-3 col-xs-12">Visible to seller </label>
+               <!-- <div class="form-group">
+                  <label class="control-label col-md-3 col-sm-3 col-xs-12">Visible to seller </label>
                   <div class="col-md-6 col-sm-6 col-xs-12 @if ($errors->has('is_visible_to_seller')) error @endif">
-                     @if(isset($scoupons))
-                     <input type="number" id="name" min="0" max="1" class="form-control col-md-7 col-xs-12" name="is_visible_to_seller" value ="@if($errors->has('is_visible_to_seller')){{old('is_visible_to_seller')}}@else{{$scoupons->is_visible_to_seller}}@endif "  required />
-	                     @if($errors->has('is_visible_to_seller'))
-	                     <div class="alert alert-danger">
-	                        {{$errors->first('is_visible_to_seller')}}
-	                     </div>
-	                     @endif
-                     @else
-                    <input type="number"  min="0" max="1" name="is_visible_to_seller" id="name" value="{{old('is_visible_to_seller')}}">
+                    @if(isset($scoupons))
+                      <select class="form-control m-bot15" name="is_visible_to_seller">
+                         <option value="0" @if(0 == $scoupons->is_visible_to_seller){{'selected'}}@endif>No</option>
+                         <option value="1" @if(1 == $scoupons->is_visible_to_seller){{'selected'}}@endif>Yes</option> 
+                    </select>
+                    @else
+                      <select class="form-control m-bot15" name="is_visible_to_seller">
+                         <option value="0">No</option>
+                         <option value="1">Yes</option> 
+                    </select>
                     @endif
                   </div>
                </div>
                <div class="form-group">
-                  <label for="confirmpassword" class="control-label col-md-3 col-sm-3 col-xs-12">Visible to buyer </label>
+                  <label class="control-label col-md-3 col-sm-3 col-xs-12">Visible to buyer </label>
                   <div class="col-md-6 col-sm-6 col-xs-12 @if ($errors->has('is_visible_to_buyer')) error @endif">
                      @if(isset($scoupons))
-                     <input type="number" id="name" min="0" max="1" class="form-control col-md-7 col-xs-12" name="is_visible_to_buyer" value ="@if($errors->has('is_visible_to_buyer')){{old('is_visible_to_buyer')}}@else{{$scoupons->is_visible_to_buyer}}@endif "  required />
-	                     @if($errors->has('is_visible_to_buyer'))
-	                     <div class="alert alert-danger">
-	                        {{$errors->first('is_visible_to_buyer')}}
-	                     </div>
-	                     @endif
-                     @else
-                    <input type="number"  min="0" max="1" name="is_visible_to_buyer" id="name" value="{{old('is_visible_to_buyer')}}">
+                      <select class="form-control m-bot15" name="is_visible_to_buyer">
+                         <option value="0" @if(0 == $scoupons->is_visible_to_buyer){{'selected'}}@endif>No</option>
+                         <option value="1" @if(1 == $scoupons->is_visible_to_buyer){{'selected'}}@endif>Yes</option> 
+                    </select>
+                    @else
+                      <select class="form-control m-bot15" name="is_visible_to_buyer">
+                         <option value="0">No</option>
+                         <option value="1">Yes</option> 
+                    </select>
                     @endif
                   </div>
                </div>
                <div class="form-group">
-                  <label for="confirmpassword" class="control-label col-md-3 col-sm-3 col-xs-12">Visible to Public </label>
+                  <label class="control-label col-md-3 col-sm-3 col-xs-12">Visible to Public </label>
                   <div class="col-md-6 col-sm-6 col-xs-12 @if ($errors->has('is_visible_to_public')) error @endif">
                      @if(isset($scoupons))
-                     <input type="number" id="name" min="0" max="1" class="form-control col-md-7 col-xs-12" name="is_visible_to_public" value ="@if($errors->has('is_visible_to_public')){{old('is_visible_to_public')}}@else{{$scoupons->is_visible_to_public}}@endif "  required />
-	                     @if($errors->has('is_visible_to_public'))
-	                     <div class="alert alert-danger">
-	                        {{$errors->first('is_visible_to_public')}}
-	                     </div>
-	                     @endif
+                      <select class="form-control m-bot15" name="is_visible_to_public">
+                         <option value="0" @if(0 == $scoupons->is_visible_to_public){{'selected'}}@endif>No</option>
+                         <option value="1" @if(1 == $scoupons->is_visible_to_public){{'selected'}}@endif>Yes</option> 
+                    </select>
+                       @if($errors->has('is_visible_to_public'))
+                       <div class="alert alert-danger">
+                          {{$errors->first('is_visible_to_public')}}
+                       </div>
+                       @endif
+                    @else
+                      <select class="form-control m-bot15" name="is_visible_to_public">
+                         <option value="0">No</option>
+                         <option value="1">Yes</option> 
+                    </select>
+                    @endif
+                  </div>
+               </div> -->
+               
+               <div class="form-group">
+                  <label class="control-label col-md-3 col-sm-3 col-xs-12">No of Use </label>
+                  <div class="col-md-6 col-sm-6 col-xs-12 @if ($errors->has('no_of_transaction')) error @endif">
+                      @if(isset($scoupons))
+                     <input type="text" id="name" class="form-control col-md-7 col-xs-12" name="no_of_transaction" value ="@if($errors->has('no_of_transaction')){{old('no_of_transaction')}}@else{{$scoupons->no_of_transaction}}@endif "  required />
+                       @if($errors->has('no_of_transaction'))
+                       <div class="alert alert-danger">
+                          {{$errors->first('no_of_transaction')}}
+                       </div>
+                       @endif
                      @else
-                    <input type="number"  min="0" max="1" name="is_visible_to_public" id="name" value="{{old('is_visible_to_public')}}">
+                    <input type="text" name="no_of_transaction" class="form-control m-bot15" id="name" value="{{old('no_of_transaction')}}">
                     @endif
                   </div>
                </div>
+               <div class="form-group">
+                  <label class="control-label col-md-3 col-sm-3 col-xs-12">Discount Type </label>
+                  <div class="col-md-6 col-sm-6 col-xs-12 @if ($errors->has('discount_type')) error @endif">
+                    @if(isset($scoupons))
+                    <label class="control-label col-md-4 col-sm-4 col-xs-12">Is Percentage <input type="radio" name="discount_type" value="percentage" @if('percentage' == $scoupons->discount_type){{'checked'}}@endif></label>
+                    
+                    <label class="control-label col-md-4 col-sm-4 col-xs-12">Is Fixed <input type="radio" name="discount_type" value="fixed" @if('fixed' == $scoupons->discount_type){{'checked'}}@endif></label>
+                    
+                    @else
+                    <label class="control-label col-md-4 col-sm-4 col-xs-12">Is Percentage <input type="radio" name="discount_type" value="percentage"> </label>
+                    
+                    <label class="control-label col-md-4 col-sm-4 col-xs-12">Is Fixed <input type="radio" name="discount_type" value="fixed"></label>
+                    
+                    @endif
+                    </div>
+               </div>
                 <div class="form-group">
-                  <label for="confirmpassword" class="control-label col-md-3 col-sm-3 col-xs-12">Discount </label>
+                  <label class="control-label col-md-3 col-sm-3 col-xs-12">Discount @if('percentage' == $scoupons->discount_type){{'(%)'}}@elseif('fixed' == $scoupons->discount_type){{'($)'}}@endif</label>
                   <div class="col-md-6 col-sm-6 col-xs-12 @if ($errors->has('discount')) error @endif">
                      @if(isset($scoupons))
                      <input type="text" id="name" class="form-control col-md-7 col-xs-12" name="discount" value ="@if($errors->has('discount')){{old('discount')}}@else{{$scoupons->discount}}@endif "  required />
@@ -156,55 +196,77 @@
 	                     </div>
 	                     @endif
                      @else
-                    <input type="number"  min="0" max="1" name="discount" id="name" value="{{old('discount')}}">
+                    <input type="text"  min="0" max="1" class="form-control m-bot15" name="discount" id="name" value="{{old('discount')}}">
                     @endif
                   </div>
                </div>
                <div class="form-group">
-                  <label for="confirmpassword" class="control-label col-md-3 col-sm-3 col-xs-12">Is Fixed </label>
+                  <label class="control-label col-md-3 col-sm-3 col-xs-12">Status</label>
+                  <div class="col-md-6 col-sm-6 col-xs-12 @if ($errors->has('status')) error @endif">
+                    @if(isset($scoupons))
+                      <select class="form-control m-bot15" name="status">
+                         <option value="0" @if(0 == $scoupons->status){{'selected'}}@endif>Inactive</option>
+                         <option value="1" @if(1 == $scoupons->status){{'selected'}}@endif>Active</option> 
+                    </select>
+                    @else
+                      <select class="form-control m-bot15" name="status">
+                         <option value="0">Inactive</option>
+                         <option value="1">Active</option> 
+                    </select>
+                    @endif
+                  </div>
+               </div>
+               <!-- <div class="form-group">
+                  <label class="control-label col-md-3 col-sm-3 col-xs-12">Is Fixed </label>
                   <div class="col-md-6 col-sm-6 col-xs-12 @if ($errors->has('is_fixed')) error @endif">
-                     @if(isset($scoupons))
-                     <input type="number" id="name" min="0" max="1" class="form-control col-md-7 col-xs-12" name="is_fixed" value ="@if($errors->has('is_fixed')){{old('is_fixed')}}@else{{$scoupons->is_fixed}}@endif "  required />
-	                     @if($errors->has('is_fixed'))
-	                     <div class="alert alert-danger">
-	                        {{$errors->first('is_fixed')}}
-	                     </div>
-	                     @endif
-                     @else
-                    <input type="number"  min="0" max="1" name="is_fixed" id="name" value="{{old('is_fixed')}}">
+                    @if(isset($scoupons))
+                      <select class="form-control m-bot15" name="is_fixed">
+                         <option value="0" @if(0 == $scoupons->is_fixed){{'selected'}}@endif>No</option>
+                         <option value="1" @if(1 == $scoupons->is_fixed){{'selected'}}@endif>Yes</option> 
+                    </select>
+                    @else
+                      <select class="form-control m-bot15" name="is_fixed">
+                         <option value="0">No</option>
+                         <option value="1">Yes</option> 
+                    </select>
                     @endif
+                    
+
                   </div>
                </div>
+
                <div class="form-group">
-                  <label for="confirmpassword" class="control-label col-md-3 col-sm-3 col-xs-12">Is Percentage </label>
+                  <label class="control-label col-md-3 col-sm-3 col-xs-12">Is Percentage </label>
                   <div class="col-md-6 col-sm-6 col-xs-12 @if ($errors->has('is_percentage')) error @endif">
                      @if(isset($scoupons))
-                     <input type="number" id="name" min="0" max="1" class="form-control col-md-7 col-xs-12" name="is_percentage" value ="@if($errors->has('is_percentage')){{old('is_percentage')}}@else{{$scoupons->is_percentage}}@endif "  required />
-	                     @if($errors->has('is_percentage'))
-	                     <div class="alert alert-danger">
-	                        {{$errors->first('is_percentage')}}
-	                     </div>
-	                     @endif
-                     @else
-                    <input type="number"  min="0" max="1" name="is_percentage" id="name" value="{{old('is_percentage')}}">
+                      <select class="form-control m-bot15" name="is_percentage">
+                         <option value="0" @if(0 == $scoupons->is_percentage){{'selected'}}@endif>No</option>
+                         <option value="1" @if(1 == $scoupons->is_percentage){{'selected'}}@endif>Yes</option> 
+                    </select>
+                    @else
+                      <select class="form-control m-bot15" name="is_percentage">
+                         <option value="0">No</option>
+                         <option value="1">Yes</option> 
+                    </select>
                     @endif
                   </div>
-               </div>
-               <div class="form-group">
-                  <label for="confirmpassword" class="control-label col-md-3 col-sm-3 col-xs-12">Role ID</label>
-                  <div class="col-md-6 col-sm-6 col-xs-12 @if ($errors->has('role_id')) error @endif">
+               </div> -->
+               
+               <!-- <div class="form-group">
+                  <label class="control-label col-md-3 col-sm-3 col-xs-12">Role ID</label>
+                  <div class="col-md-6 col-sm-6 col-xs-12 @if ($errors->has('role')) error @endif">
                      @if(isset($scoupons))
-                     <input type="text" id="name" class="form-control col-md-7 col-xs-12" name="role_id" value ="@if($errors->has('role_id')){{old('role_id')}}@else{{$scoupons->role_id}}@endif "  required />
-	                     @if($errors->has('role_id'))
+                     <input type="text" id="name" class="form-control col-md-7 col-xs-12" name="role" value ="@if($errors->has('role')){{old('role_id')}}@else{{$scoupons->role}}@endif "  required />
+	                     @if($errors->has('role'))
 	                     <div class="alert alert-danger">
-	                        {{$errors->first('role_id')}}
+	                        {{$errors->first('role')}}
 	                     </div>
 	                     @endif
                      @else
-                    <input type="number"  min="0" max="1" name="role_id" id="name" value="{{old('role_id')}}">
+                    <input type="text" class="form-control m-bot15"  min="0" max="1" name="role" id="name" value="{{old('role')}}">
                     @endif
                   </div>
-               </div>
+               </div> -->
                <div class="ln_solid"></div>
                <div class="form-group">
                   <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
