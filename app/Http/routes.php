@@ -262,4 +262,22 @@ Route::group(["prefix"=>"admindashboard"],function(){
 		Route::any("edit/{id?}","Admin\AchievementController@edit_achievement");
 		Route::get("delete/{id}","Admin\AchievementController@delete_achievement");
 	});
+
+	Route::group(["prefix"=>"Advert"],function(){
+		Route::get("manage-advert","Admin\AdvertController@manageAdverts");
+		Route::get("edit-advert","Admin\AdvertController@addAdverts");
+		Route::get("edit-advert/delete","Admin\AdvertController@deleteAdvert");
+		Route::post("edit-advert","Admin\AdvertController@addAdverts");
+		Route::get("manage-advert-category","Admin\AdvertController@manageAdvertcategory");
+		Route::get("edit-advert-category","Admin\AdvertController@addAdvertcategory");
+		Route::get("edit-advert-category/delete","Admin\AdvertController@deleteAdvertcategory");
+		Route::post("edit-advert-category","Admin\AdvertController@addAdvertcategory");
+	});
+
+	Route::group(["prefix"=>"Banner"],function(){
+		Route::get("manage-banner","Admin\BannerController@manageBanners");
+		Route::get("edit-banner","Admin\BannerController@addBanners");
+		Route::get("manage-banner/delete","Admin\BannerController@deleteBanner");
+		Route::post("edit-banner","Admin\BannerController@addBanners");
+	});
 });
