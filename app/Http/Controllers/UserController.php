@@ -153,7 +153,7 @@ class UserController extends BaseController
                 $is_buyer = $userss->is_buyer;
 
                 $confirmed = $userss->confirmed;
-
+                 $active = $userss->status;
                 $user_id = $userss->user_id;
 
             }
@@ -170,7 +170,7 @@ class UserController extends BaseController
             }
 			// prashant kumar
 
-            if($email == $request->email &&  (Hash::check($request->password, $password)) && $is_buyer == '1' && $confirmed == '1'){
+            if($email == $request->email &&  (Hash::check($request->password, $password)) && $is_buyer == '1' && $confirmed == '1'&& $active == '0'){
 
                 session()->regenerate();
 

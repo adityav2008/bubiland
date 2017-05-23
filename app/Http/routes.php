@@ -280,4 +280,24 @@ Route::group(["prefix"=>"admindashboard"],function(){
 		Route::get("manage-banner/delete","Admin\BannerController@deleteBanner");
 		Route::post("edit-banner","Admin\BannerController@addBanners");
 	});
+
+	Route::group(["prefix"=>"Buyer"],function(){
+		Route::get("manage-buyer","Admin\UserController@manageBuyers");
+		Route::get("edit-buyer","Admin\UserController@addBuyers");
+		Route::get("manage-buyer/delete","Admin\UserController@deleteBuyer");
+		Route::any("manage-buyer/view","Admin\UserController@viewBuyer");
+		Route::any("manage-buyer/block","Admin\UserController@blockBuyer");
+		Route::post("edit-buyer","Admin\UserController@addBuyers");
+	});
+
+	Route::group(["prefix"=>"Seller"],function(){
+		Route::get("manage-seller","Admin\UserController@manageSellers");
+		Route::get("edit-seller","Admin\UserController@addSellers");
+		Route::get("manage-seller/delete","Admin\UserController@deleteSeller");
+		Route::any("manage-seller/auction","Admin\UserController@viewSellerAuction");
+		Route::any("manage-seller/view-auction/auction","Admin\UserController@viewauctionDetail");
+		Route::any("manage-seller/view","Admin\UserController@viewSeller");
+		Route::any("manage-seller/block","Admin\UserController@blockSeller");
+		Route::post("edit-seller","Admin\UserController@addSellers");
+	});
 });
